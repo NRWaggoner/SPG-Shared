@@ -4,7 +4,7 @@ using System;
 
 namespace AuroraEndeavors.SharedComponents
 {
-    public class BalloonComponentController : MonoBehaviour
+    public class BalloonManager: MonoBehaviour
     {
         public int balloonCount;
         public float balloonSpawnWaitTime;
@@ -15,6 +15,12 @@ namespace AuroraEndeavors.SharedComponents
         public float horizontalPadding;
         public Color[] colors;
 
+		public float balloonVerticalSpeed;
+		public float balloonHorizontalSpeed;
+		public float maxHorizontalFloatAmount;
+		public float rotationSpeed;
+		public float maxRotationAngle;
+		public float maxRandomization;
 
         private int m_spawnedBalloonCount = 0;
         private float m_balloonXPos;
@@ -22,15 +28,15 @@ namespace AuroraEndeavors.SharedComponents
         private int m_balloonPoppedCount = 0;
         private bool m_allBalloonsArePopped = false;
 
-        private bool CelebrationComplete = false;
+        private bool m_celebrationComplete = false;
 
         public event CEvents.CompletedEventHandler Completed;
 
         void OnCompleted(EventArgs e)
         {
-            if (!CelebrationComplete)
+            if (!m_celebrationComplete)
             {
-                CelebrationComplete = true;
+                m_celebrationComplete = true;
                 if (Completed != null)
                     Completed(e);
             }
@@ -41,18 +47,17 @@ namespace AuroraEndeavors.SharedComponents
         {
 
             Reset();
-            //test 
+            //TODO Testing: TriggerBalloons() called in Start() for testing puurposes (remove when no longer needed)
             TriggerBallons();
         }
 
         public void Reset()
-        {
-            //convert y StartPos to World Space;
+        {            
             m_balloonYWorldPos = CUtilities.ConvertViewportYAxisToWorldYAxis(balloonSpawnYPos);
             m_spawnedBalloonCount = 0;
             m_balloonPoppedCount = 0;
             m_allBalloonsArePopped = false;
-            CelebrationComplete = false;
+            m_celebrationComplete = false;
         }
 
 
@@ -68,12 +73,18 @@ namespace AuroraEndeavors.SharedComponents
                 yield return new WaitForSeconds(balloonSpawnWaitTime);
 
                 GameObject goBalloon = (GameObject)Instantiate(balloon, new Vector3(m_balloonXPos, m_balloonYWorldPos, 0), Quaternion.identity);
-                BalloonControllerScript newBalloon = goBalloon.GetComponent<BalloonControllerScript>();
+                BalloonController newBalloon = goBalloon.GetComponent<BalloonController>();
 
                 // Calculate a random x offset with enough padding to ensure it can't float of screen horizontally
-                m_balloonXPos = CUtilities.GetRandomScreenSingleAxisPos(horizontalPadding);
-                // m_balloonXPos =  CUtilities.GetRandomScreenSingleAxisPos(newBalloon.maxHorizontalFloatAmount);
+                m_balloonXPos = CUtilities.GetRandomScreenSingleAxisPos(horizontalPadding);               
                 newBalloon.gameObject.transform.position = new Vector3(m_balloonXPos, m_balloonYWorldPos, 0);
+				newBalloon.BalloonVerticalSpeed = balloonVerticalSpeed;
+				newBalloon.BalloonHorizontalSpeed = balloonHorizontalSpeed;
+				newBalloon.MaxHorizontalFloatAmount = maxHorizontalFloatAmount;
+				newBalloon.RotationSpeed = rotationSpeed;
+				newBalloon.MaxRotationAngle = maxRotationAngle;
+				newBalloon.MaxRandomization = maxRandomization;
+				newBalloon.ApplyRandomization();
                     
                 SpriteRenderer spriteRenderer = newBalloon.GetComponent<SpriteRenderer>();  
                 spriteRenderer.color = ChooseRandomColor();
@@ -101,11 +112,10 @@ namespace AuroraEndeavors.SharedComponents
 
         // Update is called once per frame
         void Update()
-        {
-
-            //Check balloons out of bounds
+        {           
             GameObject[] balloons = GameObject.FindGameObjectsWithTag("Balloon");
 
+			//Check for balloon touches/clicks
             ProcessInput(balloons);
 
             foreach (GameObject balloon in balloons)
@@ -113,7 +123,7 @@ namespace AuroraEndeavors.SharedComponents
                 VerifyOutOfBounds(balloon);
             }
 
-            //if all are popped and all destroyed, this means they have been popped, 
+            //If all are popped and all destroyed, this means they have been popped, 
             //or gone out of bounds and their animations have completed
             if (m_allBalloonsArePopped && balloons.Length == 0)
             {
@@ -126,16 +136,12 @@ namespace AuroraEndeavors.SharedComponents
             Vector3 balloonScreenPos = Camera.main.WorldToScreenPoint(balloon.rigidbody2D.position);
             //Animator anim = balloon.GetComponent<Animator>() as Animator;
 
-            //test outof bounds
             if (balloonScreenPos.y > Screen.height - screenPadding)
             {
-                PopBalloon(balloon);
-                //anim.SetTrigger("Touched");
-                //IncrementBalloonPoppedCount();
+                PopBalloon(balloon);               
             }
-
         }
-
+	
         void PopBalloon(GameObject balloon)
         {
             Animator anim = balloon.GetComponent<Animator>() as Animator;
@@ -147,6 +153,7 @@ namespace AuroraEndeavors.SharedComponents
         {
             bool success = false;
             Vector3 touchPos = new Vector3();
+
 #if UNITY_EDITOR
             if (Input.GetMouseButtonDown(0))
             {
