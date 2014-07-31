@@ -46,8 +46,8 @@
 	</Reference>
   </ItemGroup>
   <ItemGroup>
-     <Compile Include="Assets\Scripts\BalloonComponentController.cs" />
-     <Compile Include="Assets\Scripts\BalloonControllerScript.cs" />
+     <Compile Include="Assets\Scripts\BalloonController.cs" />
+     <Compile Include="Assets\Scripts\BalloonManager.cs" />
      <Compile Include="Assets\Scripts\Events.cs" />
      <Compile Include="Assets\Scripts\Utilities.cs" />
   </ItemGroup>
