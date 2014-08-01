@@ -154,7 +154,7 @@ namespace AuroraEndeavors.SharedComponents
             bool success = false;
             Vector3 touchPos = new Vector3();
 
-#if UNITY_EDITOR
+#if UNITY_EDITOR || UNITY_WEBPLAYER || UNITY_METRO
             if (Input.GetMouseButtonDown(0))
             {
                 success = true;
