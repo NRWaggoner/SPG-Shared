@@ -6,7 +6,6 @@ namespace AuroraEndeavors.SharedComponents
 {
     public class CEvents
     {
-
         public delegate void CompletedEventHandler(EventArgs e);
     }
 }
