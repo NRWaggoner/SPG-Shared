@@ -16,6 +16,8 @@ namespace AuroraEndeavors.GameEngine
             s_gameDevice = device;
         }
 
+        public static IGameDevice GameDevice
+        { get { return s_gameDevice; } }
         private static IGameDevice s_gameDevice = null;
 
         public static void initializeProducts()
@@ -126,7 +128,7 @@ namespace AuroraEndeavors.GameEngine
         {
             if (s_sceneList == null || s_sceneList.Count < 1)
                 throw new Exception("No Game Scenes to Play");
-            
+
             IGameScene retVal = s_gameDevice.CreateGameScene(s_sceneList[s_gameIndex]);
 
             s_gameIndex++;
@@ -138,10 +140,10 @@ namespace AuroraEndeavors.GameEngine
         private static int s_gameIndex = 0;
 
         static List<string> s_sceneList;
-        
+
         static bool s_intialized = false;
         static List<CGameManager> s_gameManagers = new List<CGameManager>();
-        
+
         #endregion
 
         public Camera BackgroundCamera;
@@ -225,7 +227,7 @@ namespace AuroraEndeavors.GameEngine
 
 
             m_menu = s_gameDevice.CreateGameMenu();
-            
+
             m_menu.MenuActivated += new GameEngine.OnMenuActivated(OnMenuActivated);
             m_menu.Show();
 
@@ -299,6 +301,9 @@ namespace AuroraEndeavors.GameEngine
 
         void OnApplicationPause()
         {
+            if (m_telemetryMgr == null)
+                return;
+
             if (isPaused)
                 m_telemetryMgr.SessionResume();
             else
@@ -360,7 +365,7 @@ namespace AuroraEndeavors.GameEngine
         {
             m_sceneTransitioner.StartTransition();
         }
-        
+
 
         public void SwapInNextScene()
         {
@@ -406,7 +411,7 @@ namespace AuroraEndeavors.GameEngine
         private Vector3 m_initialCameraPos;
         private float m_verticalSize;
         private float m_horizontalSize;
-        
+
 
 
         private IGameMenu m_menu = null;

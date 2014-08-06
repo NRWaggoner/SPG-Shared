@@ -31,7 +31,7 @@ namespace AuroraEndeavors.GameEngine
             m_userId = UserId;
 
 
-            m_dataCache = m_device.GetDataCacheManager();
+            m_dataCache = CGameManager.GameDevice.GetDataCacheManager();
 
             //
             // Restore GameDifficulty
@@ -206,9 +206,7 @@ namespace AuroraEndeavors.GameEngine
             string key = "GameSetting_" + m_userId + "_" + type;
             return key;
         }
-
-
-        private IGameDevice m_device = null;
+        
         private IDataCacheManager m_dataCache = null;
     }
 }
