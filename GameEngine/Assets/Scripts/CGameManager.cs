@@ -126,10 +126,7 @@ namespace AuroraEndeavors.GameEngine
         {
             if (s_sceneList == null || s_sceneList.Count < 1)
                 throw new Exception("No Game Scenes to Play");
-
-            //GameObject prefab = Resources.Load<GameObject>(s_sceneList[s_gameIndex]);
-            //CSceneManager retVal = ((GameObject)Instantiate(prefab)).GetComponentInChildren<CSceneManager>();
-
+            
             IGameScene retVal = s_gameDevice.CreateGameScene(s_sceneList[s_gameIndex]);
 
             s_gameIndex++;
@@ -141,7 +138,6 @@ namespace AuroraEndeavors.GameEngine
         private static int s_gameIndex = 0;
 
         static List<string> s_sceneList;
-        static GameObject s_gameMenu;
         
         static bool s_intialized = false;
         static List<CGameManager> s_gameManagers = new List<CGameManager>();
@@ -210,7 +206,6 @@ namespace AuroraEndeavors.GameEngine
 
                 s_intialized = true;
 
-                s_gameMenu = Resources.Load<GameObject>("Menu/" + "Menu");
 
 
 
@@ -227,10 +222,7 @@ namespace AuroraEndeavors.GameEngine
             button.Initialize(this.gameObject);
             button.ItemChanged += OnBackPressed;
 
-            //TODO(NOW)
-            //GameObject go = (GameObject)Instantiate(s_gameMenu);
-            //go.transform.position = new Vector3(0, 0, 0);
-            //m_menu = go.GetComponent<CMenu>();
+
 
 
             m_menu = s_gameDevice.CreateGameMenu();
