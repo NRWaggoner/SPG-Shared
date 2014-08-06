@@ -11,7 +11,7 @@ namespace AuroraEndeavors.GameEngine
     public delegate void OnStartingPurchase();
     public delegate void OnItemPurchaseChange(string Id);
 
-    interface IBilling : IRootableObject
+    public interface IBilling : IRootableObject
     {
         event OnInitialized Initalized;
         event OnItemPurchaseChange ItemPurchaseFailure;

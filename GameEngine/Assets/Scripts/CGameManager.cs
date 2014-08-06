@@ -11,31 +11,19 @@ namespace AuroraEndeavors.GameEngine
     {
 
         #region Statics
-        private static void StaticInitialize()
+        public static void Initialize(IGameDevice device)
         {
-            if (!s_intialized)
-            {
-
-                s_intialized = true;
-
-                s_gameMenu = Resources.Load<GameObject>("Menu/" + "Menu");
-
-
-
-                initializeProducts();
-            }
+            s_gameDevice = device;
         }
 
+        private static IGameDevice s_gameDevice = null;
 
         public static void initializeProducts()
         {
-            if (s_initializingProducts ||
-                !CInterfaceRegistrar.Instance.IsRegistered<IGameDevice>() ||
-                !CInterfaceRegistrar.Instance.IsRegistered<IDataCache>())
+            if (s_initializingProducts)
                 return;
 
-            IGameDevice productFactory = CInterfaceRegistrar.Instance.GetInstance<IGameDevice>();
-            IDataCache dataCache = CInterfaceRegistrar.Instance.GetInstance<IDataCache>();
+            IDataCacheManager dataCache = s_gameDevice.GetDataCacheManager();
 
             s_initializingProducts = true;
 
@@ -49,10 +37,10 @@ namespace AuroraEndeavors.GameEngine
             //
             s_products = new List<IInAppProduct>()
                 {
-                    productFactory.GetProduct("vuBDb3UeuT"),
-                    productFactory.GetProduct("MfJDQYprYJ"),
-                    productFactory.GetProduct("McCdr6eS0J"),
-                    productFactory.GetProduct("lQ5JMb3eV0")
+                    s_gameDevice.GetProduct("vuBDb3UeuT"),
+                    s_gameDevice.GetProduct("MfJDQYprYJ"),
+                    s_gameDevice.GetProduct("McCdr6eS0J"),
+                    s_gameDevice.GetProduct("lQ5JMb3eV0")
                 };
 
 
@@ -88,7 +76,7 @@ namespace AuroraEndeavors.GameEngine
             bypassProduct.BypassPurchase();
             s_products.Remove(bypassProduct);
 
-            CInterfaceRegistrar.Instance.GetInstance<ICoRoutineRunner>().RunCoRoutine(checkProducts);
+            s_gameDevice.GetCoRoutineRunner().RunCoRoutine(checkProducts);
         }
         private static bool s_initializingProducts = false;
 
@@ -142,7 +130,7 @@ namespace AuroraEndeavors.GameEngine
             //GameObject prefab = Resources.Load<GameObject>(s_sceneList[s_gameIndex]);
             //CSceneManager retVal = ((GameObject)Instantiate(prefab)).GetComponentInChildren<CSceneManager>();
 
-            IGameScene retVal = m_device.CreateGameScene(s_sceneList[s_gameIndex]);
+            IGameScene retVal = s_gameDevice.CreateGameScene(s_sceneList[s_gameIndex]);
 
             s_gameIndex++;
             if (s_gameIndex >= s_sceneList.Count)
@@ -157,7 +145,7 @@ namespace AuroraEndeavors.GameEngine
         
         static bool s_intialized = false;
         static List<CGameManager> s_gameManagers = new List<CGameManager>();
-        static IGameDevice m_device = null; //TODO(NOW): INITIALIZE
+        
         #endregion
 
         public Camera BackgroundCamera;
@@ -205,7 +193,7 @@ namespace AuroraEndeavors.GameEngine
 
             // Get the process of logging in and getting telemetry kicked off setup first.
             //
-            m_telemetryMgr = CInterfaceRegistrar.Instance.GetInstance<ITelemetryManager>();
+            m_telemetryMgr = s_gameDevice.GetTelemetryManager();
             CGameSettings.Instance.Initialize(m_telemetryMgr.UserId);
 
 
@@ -213,19 +201,29 @@ namespace AuroraEndeavors.GameEngine
 
             // Initialize Billing
             //
-            m_billing = CInterfaceRegistrar.Instance.GetInstance<IBilling>();
+            m_billing = s_gameDevice.GetBilling();
             m_billing.Initialize(this.gameObject);
 
-            StaticInitialize();
-
-
-
-
-
-
             m_audioSrc.Play();
+            if (!s_intialized)
+            {
 
-            IMainBackButton button = CInterfaceRegistrar.Instance.GetInstance<IMainBackButton>();
+                s_intialized = true;
+
+                s_gameMenu = Resources.Load<GameObject>("Menu/" + "Menu");
+
+
+
+                initializeProducts();
+            }
+
+
+
+
+
+
+
+            IMainBackButton button = s_gameDevice.GetMainBackButton();
             button.Initialize(this.gameObject);
             button.ItemChanged += OnBackPressed;
 
@@ -233,9 +231,9 @@ namespace AuroraEndeavors.GameEngine
             //GameObject go = (GameObject)Instantiate(s_gameMenu);
             //go.transform.position = new Vector3(0, 0, 0);
             //m_menu = go.GetComponent<CMenu>();
-            
 
-            m_menu = m_device.CreateGameMenu();
+
+            m_menu = s_gameDevice.CreateGameMenu();
             
             m_menu.MenuActivated += new GameEngine.OnMenuActivated(OnMenuActivated);
             m_menu.Show();
@@ -268,7 +266,7 @@ namespace AuroraEndeavors.GameEngine
             m_verticalSize = Camera.main.orthographicSize * 2;
             m_horizontalSize = Camera.main.aspect * m_verticalSize;
 
-            m_sceneTransitioner = CInterfaceRegistrar.Instance.GetInstance<ITransitionScenes>();
+            m_sceneTransitioner = s_gameDevice.GetSceneTransitioner();
             m_sceneTransitioner.Initialize(m_horizontalSize, m_verticalSize, this);
 
             m_woodenBackground = GameObject.CreatePrimitive(PrimitiveType.Quad);

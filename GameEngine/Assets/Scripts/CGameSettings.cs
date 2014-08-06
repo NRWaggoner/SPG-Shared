@@ -30,10 +30,8 @@ namespace AuroraEndeavors.GameEngine
 
             m_userId = UserId;
 
-            if (!CInterfaceRegistrar.Instance.IsRegistered<IDataCache>())
-                throw new Exception("Cannot initialize CGameSettings since IDataCache is not registered.");
 
-            m_dataCache = CInterfaceRegistrar.Instance.GetInstance<IDataCache>();
+            m_dataCache = m_device.GetDataCacheManager();
 
             //
             // Restore GameDifficulty
@@ -210,6 +208,7 @@ namespace AuroraEndeavors.GameEngine
         }
 
 
-        private IDataCache m_dataCache = null;
+        private IGameDevice m_device = null;
+        private IDataCacheManager m_dataCache = null;
     }
 }

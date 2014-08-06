@@ -53,7 +53,7 @@
     <Compile Include="Assets\Interfaces\IBilling.cs" />
     <Compile Include="Assets\Interfaces\ICoRoutineRunner.cs" />
     <Compile Include="Assets\Interfaces\IDataCache.cs" />
-    <Compile Include="Assets\Interfaces\IGameEngineDevice.cs" />
+    <Compile Include="Assets\Interfaces\IGameDevice.cs" />
     <Compile Include="Assets\Interfaces\IGameMenu.cs" />
     <Compile Include="Assets\Interfaces\IInAppProduct.cs" />
     <Compile Include="Assets\Interfaces\ITelemetryManager.cs" />
@@ -62,7 +62,6 @@
     <Compile Include="Assets\Scripts\CGameSettings.cs" />
     <Compile Include="Assets\Interfaces\IGameScene.cs" />
     <Compile Include="Assets\Interfaces\IGameSettings.cs" />
-    <Compile Include="Assets\Scripts\CInterfaceRegistrar.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\SyntaxTree\UnityVS\2013\UnityVS.CSharp.targets" />
 </Project>

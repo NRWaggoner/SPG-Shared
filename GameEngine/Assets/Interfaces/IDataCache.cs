@@ -5,7 +5,7 @@ using System.Text;
 
 namespace AuroraEndeavors.GameEngine
 {
-    interface IDataCache
+    public interface IDataCacheManager
     {
         bool GetBool(string key, bool? defaultValue);
         void SetBool(string key, bool defValue);

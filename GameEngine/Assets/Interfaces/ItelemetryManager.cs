@@ -5,7 +5,7 @@ using System.Text;
 
 namespace AuroraEndeavors.GameEngine
 {
-    interface ITelemetryManager
+    public interface ITelemetryManager
     {
         void Awake();
         void ClickNextDot(int DotNumber);
