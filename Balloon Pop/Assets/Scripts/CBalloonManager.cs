@@ -4,7 +4,7 @@ using System;
 
 namespace AuroraEndeavors.SharedComponents
 {
-    public class BalloonManager: MonoBehaviour
+    public class CBalloonManager: MonoBehaviour
     {
         public int balloonCount;
         public float balloonSpawnWaitTime;
@@ -73,7 +73,7 @@ namespace AuroraEndeavors.SharedComponents
                 yield return new WaitForSeconds(balloonSpawnWaitTime);
 
                 GameObject goBalloon = (GameObject)Instantiate(balloon, new Vector3(m_balloonXPos, m_balloonYWorldPos, 0), Quaternion.identity);
-                BalloonController newBalloon = goBalloon.GetComponent<BalloonController>();
+                CBalloonController newBalloon = goBalloon.GetComponent<CBalloonController>();
 
                 // Calculate a random x offset with enough padding to ensure it can't float of screen horizontally
                 m_balloonXPos = CUtilities.GetRandomScreenSingleAxisPos(horizontalPadding);               

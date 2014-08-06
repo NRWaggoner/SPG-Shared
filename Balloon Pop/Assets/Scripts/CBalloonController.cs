@@ -3,7 +3,7 @@ using System.Collections;
 
 namespace AuroraEndeavors.SharedComponents
 {
-    public class BalloonController : MonoBehaviour
+    public class CBalloonController : MonoBehaviour
     {
 		/// <summary>
 		/// Gets or sets the balloon vertical speed.
