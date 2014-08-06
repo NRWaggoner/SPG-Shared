@@ -7,7 +7,6 @@ namespace AuroraEndeavors.GameEngine
 {
     public interface ITelemetryManager
     {
-        void Awake();
         void ClickNextDot(int DotNumber);
         void ClickWhiteSpace();
         void ClickWrongDot(int DotNumber);
