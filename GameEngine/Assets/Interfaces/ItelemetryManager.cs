@@ -12,7 +12,24 @@ namespace AuroraEndeavors.GameEngine
         void ClickWrongDot(int DotNumber);
         
 
-        void CreateUser();
+
+
+
+
+        void CreateAnonymousUser();
+
+        void CreateUser(string userName, string password);
+
+        void LogInUser(string userName, string password);
+
+        bool IsUserEmailValid();
+
+
+
+
+
+
+
         void DragEnd();
         void DragNextDot(int DotNumber);
         void DragStart();

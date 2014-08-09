@@ -6,13 +6,19 @@ using System.Text;
 namespace AuroraEndeavors.GameEngine
 {
     public delegate void OnProductChanged(IInAppProduct sender);
-    
+
+    public enum BypassType
+    {
+        OneTime,
+        Permanent
+    };
+
     public interface IInAppProduct
     {
         event OnProductChanged ProductChanged;
 
 
-        void BypassPurchase();
+        void BypassPurchase(BypassType bypassType);
         void InitiatePurchase();
 
 

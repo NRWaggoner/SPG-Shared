@@ -13,7 +13,11 @@ namespace AuroraEndeavors.GameEngine
         ICoRoutineRunner GetCoRoutineRunner();
         IDataCacheManager GetDataCacheManager();
         IMainBackButton GetMainBackButton();
-        IInAppProduct GetProduct(string Id);
+
+        List<IInAppProduct> GetAllProducts();
+
+        List<IInAppProduct> GetUnlockProducts();
+
         ITelemetryManager GetTelemetryManager();
         ITransitionScenes GetSceneTransitioner();
 

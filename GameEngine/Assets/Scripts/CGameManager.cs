@@ -37,13 +37,7 @@ namespace AuroraEndeavors.GameEngine
             // this should be replaced by a call to the 
             // web-service.
             //
-            s_products = new List<IInAppProduct>()
-                {
-                    s_gameDevice.GetProduct("vuBDb3UeuT"),
-                    s_gameDevice.GetProduct("MfJDQYprYJ"),
-                    s_gameDevice.GetProduct("McCdr6eS0J"),
-                    s_gameDevice.GetProduct("lQ5JMb3eV0")
-                };
+            s_products = s_gameDevice.GetAllProducts();
 
 
             //
@@ -75,15 +69,17 @@ namespace AuroraEndeavors.GameEngine
                     }
                 }
             }
-            bypassProduct.BypassPurchase();
+            bypassProduct.BypassPurchase(BypassType.OneTime);
             s_products.Remove(bypassProduct);
 
-            s_gameDevice.GetCoRoutineRunner().RunCoRoutine(checkProducts);
+
+            s_instance.CheckVerificationProducts();
+            s_gameDevice.GetCoRoutineRunner().RunCoRoutine(CheckPurchasedProducts);
         }
         private static bool s_initializingProducts = false;
 
 
-        private static IEnumerator checkProducts(System.Object Obj)
+        private static IEnumerator CheckPurchasedProducts(System.Object Obj)
         {
             List<IInAppProduct> unPurchasedProducts = new List<IInAppProduct>();
             while (s_products.Count > 0)
@@ -267,8 +263,7 @@ namespace AuroraEndeavors.GameEngine
             m_woodenBackground.transform.localScale = new Vector3(m_horizontalSize, m_verticalSize, 0);
             m_woodenBackground.transform.position = new Vector3(0, 0, 5000);
             m_woodenBackground.renderer.material = Resources.Load<Material>("Menu/_res/" + "wood1");
-
-
+            
             m_telemetryMgr.SessionStart();
 
             m_telemetryMgr.StashData();
@@ -363,9 +358,24 @@ namespace AuroraEndeavors.GameEngine
 
         private void OnGameFinished(object sender, EventArgs e)
         {
+            CheckVerificationProducts();
             m_sceneTransitioner.StartTransition();
         }
 
+
+        private void CheckVerificationProducts()
+        {
+            if (!m_isUnlocked && m_telemetryMgr.IsUserEmailValid())
+            {
+                List<IInAppProduct> unlockProducts = s_gameDevice.GetUnlockProducts();
+                foreach (IInAppProduct product in unlockProducts)
+                {
+                    product.BypassPurchase(BypassType.Permanent);
+                }
+                m_isUnlocked = true;
+            }
+        }
+        private bool m_isUnlocked = false;
 
         public void SwapInNextScene()
         {
@@ -374,20 +384,36 @@ namespace AuroraEndeavors.GameEngine
             //
             if (m_currentGameScene != null)
             {
+                // Hide the scene, but do the destroy during the update call.
+                //
                 m_currentGameScene.Hide();
-                m_currentGameScene.Destroy();
+                m_destroyScene = m_currentGameScene;
+                this.enabled = true;
             }
 
             m_currentGameScene = getNextScene(); ;
             m_currentGameScene.GameFinished += new GameFinishedEventHandler(this.OnGameFinished);
             m_currentGameScene.Show();
-
         }
 
         public void StartNextScene()
         {
             m_currentGameScene.Begin();
         }
+
+
+        private void Update()
+        {
+            if(m_destroyScene != null)
+                m_destroyScene.Destroy();
+            this.enabled = false;
+        }
+
+
+
+
+
+
 
 
 
@@ -402,7 +428,19 @@ namespace AuroraEndeavors.GameEngine
                 m_audioSrc.Play();
         }
 
+
+
+
+
+
+
+
+
+
+
+
         #region private variables
+
         private AudioSource m_audioSrc = null;
         private ITelemetryManager m_telemetryMgr = null;
         private IBilling m_billing = null;
@@ -425,6 +463,7 @@ namespace AuroraEndeavors.GameEngine
             }
         }
         IGameScene m_currentGameScene;
+        IGameScene m_destroyScene = null;
 
 
 
