@@ -85,6 +85,7 @@ namespace AuroraEndeavors.SharedComponents
 				newBalloon.MaxRotationAngle = maxRotationAngle;
 				newBalloon.MaxRandomization = maxRandomization;
 				newBalloon.ApplyRandomization();
+                newBalloon.gameObject.SetActive(true);
                     
                 SpriteRenderer spriteRenderer = newBalloon.GetComponent<SpriteRenderer>();  
                 spriteRenderer.color = ChooseRandomColor();
