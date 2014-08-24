@@ -2,6 +2,8 @@
 using System.Collections;
 using System;
 
+using AuroraEndeavors.GameEngine;
+
 namespace AuroraEndeavors.SharedComponents
 {
     public class CBalloonManager: MonoBehaviour
@@ -116,8 +118,11 @@ namespace AuroraEndeavors.SharedComponents
         {           
             GameObject[] balloons = GameObject.FindGameObjectsWithTag("Balloon");
 
-			//Check for balloon touches/clicks
-            ProcessInput(balloons);
+            if (!CGameSettings.Instance.IsInputCaptured())
+            {
+                //Check for balloon touches/clicks
+                ProcessInput(balloons);
+            }
 
             foreach (GameObject balloon in balloons)
             {

@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System;
 using System.Collections;
+using AuroraEndeavors.Utilities;
 
 namespace AuroraEndeavors.GameEngine
 {
@@ -121,19 +122,82 @@ namespace AuroraEndeavors.GameEngine
         public float ComputeDotScale(float CameraSize)
         {
             float tempScale = 5 / 1.2f;
-            if(isPhone)
+            if (isPhone)
                 tempScale = 5 / 1.8f;
 
             tempScale = CameraSize / tempScale;
             return tempScale;
         }
 
+        public Vector2 GetScreenResolution()
+        {
+            return new Vector2(Screen.width, Screen.height);
+        }
 
 
 
+        public string GetDimensionString()
+        {
+            float aspect = CGameSettings.Instance.GetAspectRatio();
+            if (UnityHelpers.compareFloats(aspect, 2048f / 1536f, .001f))
+                return "2048x1536";
+            else if (UnityHelpers.compareFloats(aspect, 960f / 640f, .001f))
+                return "960x640";
+            else if (UnityHelpers.compareFloats(aspect, 1136f / 640f, .001f))
+                return "1136x640";
+            else
+            {
+                Debug.LogWarning("Screen resolution was not detected based on aspect ratio.  Returning iPad dimensions.");
+                return "2048x1536";
+            }
+        }
+
+        public float GetAspectRatio()
+        {
+            float aspectRatio = (float)Screen.width / (float)Screen.height;
+            if (aspectRatio != Camera.main.aspect)
+                Debug.LogWarning("Screen calculation of aspect ratio(" + aspectRatio + ") is off from camera aspect ratio(" + Camera.main.aspect + ").");
+
+            return aspectRatio;
+        }
 
 
+        public bool IsInputCaptured()
+        {   
+            bool retVal = false;
+            lock (s_lock)
+            {
+                retVal = m_requestor != null;
+            }
+            return retVal;
+        }
 
+        public bool CaptureInput(System.Object requestor)
+        {
+            bool retVal = false;
+            lock (s_lock)
+            {
+                if (m_requestor == null)
+                {
+                    m_requestor = requestor;
+                    retVal = true;
+                }
+                else if (m_requestor == requestor)
+                    retVal = true;
+            }
+            return retVal;
+        }
+
+        public void ReleaseInput(System.Object requestor)
+        {
+            lock (s_lock)
+            {
+                if (m_requestor == requestor)
+                    m_requestor = null;
+            }
+        }
+        private static System.Object s_lock = new System.Object();
+        private System.Object m_requestor = null;
 
 
 
@@ -165,7 +229,7 @@ namespace AuroraEndeavors.GameEngine
         {
             get
             {
-                if(m_lastRunDate == DateTime.MaxValue)
+                if (m_lastRunDate == DateTime.MaxValue)
                 {
                     string temp = m_dataCache.GetString(getSettingKey(SettingType.LastRunDate), DateTime.Now.ToString());
                     m_lastRunDate = DateTime.Parse(temp);
@@ -206,7 +270,7 @@ namespace AuroraEndeavors.GameEngine
             string key = "GameSetting_" + m_userId + "_" + type;
             return key;
         }
-        
+
         private IDataCacheManager m_dataCache = null;
     }
 }

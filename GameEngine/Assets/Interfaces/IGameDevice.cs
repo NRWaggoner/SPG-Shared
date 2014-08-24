@@ -21,12 +21,14 @@ namespace AuroraEndeavors.GameEngine
         ITelemetryManager GetTelemetryManager();
         ITransitionScenes GetSceneTransitioner();
 
+        IParentalGate GetParentalGate();
 
 
         IGameScene CreateGameScene(string resourcePath);
 
         IGameMenu CreateGameMenu();
 
+        
 
     }
 }

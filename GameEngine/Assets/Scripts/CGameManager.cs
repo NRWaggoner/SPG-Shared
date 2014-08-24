@@ -3,12 +3,14 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 
+using AuroraEndeavors.Utilities;
 
 namespace AuroraEndeavors.GameEngine
 {
 
     public class CGameManager : MonoBehaviour, ICoordinateTransitions
     {
+        public Material SceneBackground;
 
         #region Statics
         public static void Initialize(IGameDevice device)
@@ -142,10 +144,15 @@ namespace AuroraEndeavors.GameEngine
 
         #endregion
 
-        public Camera BackgroundCamera;
-        public GameObject MenuBackground;
-        public GameObject SceneBackground;
+        //public GameObject MenuBackground;
+        //public GameObject SceneBackground;
         public List<IGameScene> Scenes;
+        public float InitialOrthographicSize
+        {
+            get { return m_initialOrthoSize; }
+        }
+        private float m_initialOrthoSize = 3f;
+
 
         CGameManager()
         {
@@ -162,6 +169,28 @@ namespace AuroraEndeavors.GameEngine
             if (s_instance != null)
                 throw new ArgumentException("Can only instantiate a single CGameManager");
             s_instance = this;
+
+            //Camera.main.ResetAspect();
+            Camera.main.transform.parent = this.transform;
+            Camera.main.depth = 1;
+            Camera.main.orthographicSize = m_initialOrthoSize;
+
+            m_backgroundCamera = (new GameObject("Background Camera")).AddComponent<Camera>();
+            
+            m_backgroundCamera.transform.parent = this.transform;
+            m_backgroundCamera.orthographic = true;
+            m_backgroundCamera.orthographicSize = m_initialOrthoSize;
+            m_backgroundCamera.depth = 0;
+
+            GameObject quad = GameObject.CreatePrimitive(PrimitiveType.Quad);
+            quad.name = "Background Renderer";
+            quad.transform.parent = m_backgroundCamera.transform;
+            quad.transform.localScale = new Vector3(8, 6, 1);
+            quad.transform.position = new Vector3(0, 0, 2);
+            m_backgroundRenderer = quad.GetComponent<MeshRenderer>();
+            m_backgroundRenderer.material = SceneBackground;
+
+            m_backgroundCamera.transform.position = new Vector3(500f, 500f, 500f);
         }
 
         public static CGameManager Instance
@@ -213,19 +242,11 @@ namespace AuroraEndeavors.GameEngine
 
 
 
-
-
-            IMainBackButton button = s_gameDevice.GetMainBackButton();
-            button.Initialize(this.gameObject);
-            button.ItemChanged += OnBackPressed;
+            
+            
 
 
 
-
-            m_menu = s_gameDevice.CreateGameMenu();
-
-            m_menu.MenuActivated += new GameEngine.OnMenuActivated(OnMenuActivated);
-            m_menu.Show();
 
             //
             // First calculate the sizes for the menu
@@ -235,7 +256,7 @@ namespace AuroraEndeavors.GameEngine
             //
             // Next calculate the sizes for the scene
             //
-            if (Camera.main.aspect == 4f / 3f)
+            if (UnityHelpers.compareFloats(Camera.main.aspect , 4f / 3f, .001f))
                 CalculateCameraViewport(CameraPositionType.Scene, 1f);
             else
                 CalculateCameraViewport(CameraPositionType.Scene, .96f);
@@ -258,12 +279,10 @@ namespace AuroraEndeavors.GameEngine
             m_sceneTransitioner = s_gameDevice.GetSceneTransitioner();
             m_sceneTransitioner.Initialize(m_horizontalSize, m_verticalSize, this);
 
-            m_woodenBackground = GameObject.CreatePrimitive(PrimitiveType.Quad);
-            m_woodenBackground.name = "Background";
-            m_woodenBackground.transform.localScale = new Vector3(m_horizontalSize, m_verticalSize, 0);
-            m_woodenBackground.transform.position = new Vector3(0, 0, 5000);
-            m_woodenBackground.renderer.material = Resources.Load<Material>("Menu/_res/" + "wood1");
-            
+            m_menu = s_gameDevice.CreateGameMenu();
+            m_menu.MenuActivated += OnMenuActivated;
+            ShowMenu();
+
             m_telemetryMgr.SessionStart();
 
             m_telemetryMgr.StashData();
@@ -277,7 +296,7 @@ namespace AuroraEndeavors.GameEngine
         {
             m_mainCameraHeight[type] = height;
             float temp1 = m_mainCameraHeight[type] * 4f / 3f;
-            m_mainCameraWidth[type] = temp1 / BackgroundCamera.aspect;
+            m_mainCameraWidth[type] = temp1 / m_backgroundCamera.aspect;
 
             m_mainCameraLeft[type] = (1f - m_mainCameraWidth[type]) / 2f;
             m_mainCameraTop[type] = (1f - m_mainCameraHeight[type]) / 2f;
@@ -317,18 +336,15 @@ namespace AuroraEndeavors.GameEngine
                              m_mainCameraWidth[CameraPositionType.Scene],
                              m_mainCameraHeight[CameraPositionType.Scene]);
 
-            MenuBackground.SetActive(false);
-            SceneBackground.SetActive(true);
+            m_backgroundRenderer.material = SceneBackground;
+
+
             m_menu.Hide();
             SwapInNextScene();
             m_currentGameScene.Show();
             m_currentGameScene.Begin();
         }
 
-        private void OnBackPressed(System.Object sender)
-        {
-            ShowMenu();
-        }
         public void ShowMenu()
         {
             Camera.main.rect = new Rect(m_mainCameraLeft[CameraPositionType.Menu],
@@ -338,11 +354,16 @@ namespace AuroraEndeavors.GameEngine
             Camera.main.orthographicSize = m_verticalSize / 2;
             Camera.main.transform.position = m_initialCameraPos;
 
-            MenuBackground.SetActive(true);
-            SceneBackground.SetActive(false);
+
+            m_backgroundRenderer.material = m_menu.Background;
+
             m_menu.Show();
-            m_sceneTransitioner.Hide();
-            m_currentGameScene.Hide();
+            
+            if(m_sceneTransitioner != null)
+                m_sceneTransitioner.Hide();
+
+            if(m_currentGameScene != null)
+                m_currentGameScene.Hide();
         }
 
         private void OnMenuActivated(object sender, MenuActions action)
@@ -450,6 +471,9 @@ namespace AuroraEndeavors.GameEngine
         private float m_verticalSize;
         private float m_horizontalSize;
 
+        private Camera m_backgroundCamera;
+        private MeshRenderer m_backgroundRenderer;
+
 
 
         private IGameMenu m_menu = null;
@@ -464,13 +488,6 @@ namespace AuroraEndeavors.GameEngine
         }
         IGameScene m_currentGameScene;
         IGameScene m_destroyScene = null;
-
-
-
-        //
-        // Variables for the background
-        //
-        private GameObject m_woodenBackground = null;
 
 
 

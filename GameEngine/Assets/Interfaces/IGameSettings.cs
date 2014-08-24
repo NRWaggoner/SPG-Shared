@@ -43,5 +43,9 @@ namespace AuroraEndeavors.GameEngine
 
         DateTime FirstRunDate
         { get; }
+
+        bool IsInputCaptured();
+        bool CaptureInput(System.Object requestor);
+        void ReleaseInput(System.Object requestor);
     }
 }
