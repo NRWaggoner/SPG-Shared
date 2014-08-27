@@ -35,12 +35,42 @@ namespace AuroraEndeavors.SharedComponents
         /// </summary>
 		public float MaxRandomization {get;set;}
 
+
         private bool m_isViewColliding = false;
+
+		void Awake()
+		{
+
+		}
 
         // Use this for initialization
         void Start()
         {
+			this.gameObject.tag = "Balloon";
             //ApplyRandomization();
+			SpriteRenderer renderer = this.gameObject.GetComponent<SpriteRenderer>();
+			if(renderer == null)
+				renderer = this.gameObject.AddComponent<SpriteRenderer>();
+
+			Animator animator = this.gameObject.AddComponent<Animator>();
+			Rigidbody2D body = this.gameObject.AddComponent<Rigidbody2D>();
+			CircleCollider2D collider = this.gameObject.AddComponent<CircleCollider2D>();
+			
+			
+			body.mass = 1f;
+			body.drag = 1f;
+			body.angularDrag = .05f;
+			body.gravityScale = 0f;
+			body.fixedAngle = true;
+			body.isKinematic = false;
+			body.interpolation = RigidbodyInterpolation2D.None;
+			body.sleepMode = RigidbodySleepMode2D.StartAwake;
+			
+			collider.radius = .7f;
+			collider.center = new Vector2(0f, 0.5f);	
+			
+			animator.runtimeAnimatorController = Resources.Load("BalloonAnimationController") as RuntimeAnimatorController;
+
         }
 
 		/// <summary>

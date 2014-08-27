@@ -8,22 +8,30 @@ namespace AuroraEndeavors.SharedComponents
 {
     public class CBalloonManager: MonoBehaviour
     {
-        public int balloonCount;
-        public float balloonSpawnWaitTime;
+        public int balloonCount = 10;
+        public float balloonSpawnWaitTime = 1;
         //Viewport Space - 0.0f-1.0f
-        public float balloonSpawnYPos = 0.0f;
-        public GameObject balloon;
-        public float screenPadding = 10;
-        public float horizontalPadding;
-        public Color[] colors;
+        public float balloonSpawnYPos = -0.2f;
+       // public GameObject balloon;
+        public float screenPadding = 100;
+        public float horizontalPadding = .05f;
+        public Color[] colors = new Color[]{
+			new Color(255,0,0),
+			new Color(40,0,255),
+			new Color(83,255,0),
+			new Color(232,255,88),
+			new Color(248,208,44)
+		};
 
-		public float balloonVerticalSpeed;
-		public float balloonHorizontalSpeed;
-		public float maxHorizontalFloatAmount;
-		public float rotationSpeed;
-		public float maxRotationAngle;
-		public float maxRandomization;
+		public float balloonVerticalSpeed = .8f;
+		public float balloonHorizontalSpeed = .8f;
+		public float maxHorizontalFloatAmount = 2f;
+		public float rotationSpeed = .4f;
+		public float maxRotationAngle = 15f;
+		public float maxRandomization = 25f;
 
+		
+		private GameObject m_balloon;
         private int m_spawnedBalloonCount = 0;
         private float m_balloonXPos;
         private float m_balloonYWorldPos;
@@ -47,8 +55,14 @@ namespace AuroraEndeavors.SharedComponents
         // Use this for initialization
         void Start()
         {
+			
+			m_balloon = new GameObject("BallonPrefab");
+			m_balloon.AddComponent<CBalloonController>();
+			m_balloon.SetActive(false);
 
             Reset();
+
+
             //TODO Testing: TriggerBalloons() called in Start() for testing puurposes (remove when no longer needed)
             TriggerBallons();
         }
@@ -74,8 +88,9 @@ namespace AuroraEndeavors.SharedComponents
             {
                 yield return new WaitForSeconds(balloonSpawnWaitTime);
 
-                GameObject goBalloon = (GameObject)Instantiate(balloon, new Vector3(m_balloonXPos, m_balloonYWorldPos, 0), Quaternion.identity);
-                CBalloonController newBalloon = goBalloon.GetComponent<CBalloonController>();
+				GameObject goBalloon = (GameObject)Instantiate(m_balloon, new Vector3(m_balloonXPos, m_balloonYWorldPos, 0), Quaternion.identity);
+				goBalloon.name = "SpawnedBalloon";
+				CBalloonController newBalloon = goBalloon.GetComponent<CBalloonController>();
 
                 // Calculate a random x offset with enough padding to ensure it can't float of screen horizontally
                 m_balloonXPos = CUtilities.GetRandomScreenSingleAxisPos(horizontalPadding);               
@@ -89,7 +104,9 @@ namespace AuroraEndeavors.SharedComponents
 				newBalloon.ApplyRandomization();
                 newBalloon.gameObject.SetActive(true);
                     
-                SpriteRenderer spriteRenderer = newBalloon.GetComponent<SpriteRenderer>();  
+                SpriteRenderer spriteRenderer = newBalloon.GetComponent<SpriteRenderer>(); 
+				if(spriteRenderer == null)
+					spriteRenderer = newBalloon.gameObject.AddComponent<SpriteRenderer>();
                 spriteRenderer.color = ChooseRandomColor();
                 m_spawnedBalloonCount++;
             }
@@ -160,14 +177,13 @@ namespace AuroraEndeavors.SharedComponents
             bool success = false;
             Vector3 touchPos = new Vector3();
 
-#if UNITY_EDITOR || UNITY_WEBPLAYER || UNITY_METRO
             if (Input.GetMouseButtonDown(0))
             {
                 success = true;
                 touchPos = Input.mousePosition;
 
             }
-#endif
+
 
             foreach (Touch touch in Input.touches)
             {
@@ -188,7 +204,6 @@ namespace AuroraEndeavors.SharedComponents
                     if (balloon.collider2D.bounds.Contains(worldPos))
                     {
                         PopBalloon(balloon);
-
                     }
                 }
             }
