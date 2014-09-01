@@ -156,3 +156,6 @@ $RECYCLE.BIN/
 .DS_Store
 GameEngine/Library/
 GameEngine/Temp/
+
+Sign-in Control/Library/
+Sign-in Control/Temp/
